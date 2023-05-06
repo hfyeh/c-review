@@ -7,14 +7,29 @@ typedef struct __list {
 } list;
 
 list *sort(list *start) {
-    if (!start || !start->next)
+    if (!start || start->next == start)
         return start;
     list *left = start;
     list *right = left->next;
-    left->next = NULL;
+
+    left->next = start;
+    list *current = right;
+    while (current->next != start)
+        current = current->next;
+    current->next = right;
 
     left = sort(left);
     right = sort(right);
+
+    current = left;
+    while (current->next != left)
+        current = current->next;
+    current->next = NULL;
+
+    current = right;
+    while (current->next != right)
+        current = current->next;
+    current->next = NULL;
 
     for (list *merge = NULL; left || right;) {
         if (!right || (left && left->data < right->data)) {
@@ -34,6 +49,7 @@ list *sort(list *start) {
             }
             right = right->next;
         }
+        merge->next = start;
     }
     return start;
 }
@@ -41,19 +57,21 @@ list *sort(list *start) {
 void append_node(list **start, int data) {
     list *new_node = malloc(sizeof(list));
     new_node->data = data;
-    new_node->next = NULL;
     if (!*start) {
         *start = new_node;
+        new_node->next = new_node;
         return;
     }
     list *current = *start;
-    while (current->next)
+    while (current->next != *start)
         current = current->next;
     current->next = new_node;
+    new_node->next = *start;
 }
 
 void print_list(list *start) {
-    for (list *current = start; current; current = current->next)
+    printf("%d ", start->data);
+    for (list *current = start->next; current != start; current = current->next)
         printf("%d ", current->data);
     printf("\n");
 }
